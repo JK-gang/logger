@@ -7,6 +7,6 @@
   ],
   "name": "logger",
   "namespace": "",
-  "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "55.0"
+  "sfdcLoginUrl": "https://test.salesforce.com",
+  "sourceApiVersion": "56.0"
 }
