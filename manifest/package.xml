@@ -10,10 +10,15 @@
     </types>
     <types>
         <members>Log__e</members>
+        <members>Salesforce_Log__c</members>
+        <members>Salesforce_Log_Setting__mdt</members>
         <name>CustomObject</name>
     </types>
     <types>
         <name>CustomField</name>
     </types>
-    <version>55.0</version>
+    <types>
+        <name>ValidationRule</name>
+    </types>
+    <version>56.0</version>
 </Package>

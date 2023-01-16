@@ -3,20 +3,26 @@ public with sharing class LoggerTest {
     private static final Integer NUM_RECORDS = 10;
     private static final String LOG_LOCATION = 'LoggerTest';
     private static final String TEST_EMAIL = 'logerrordetailtest@mytest.com';
+    static Integer OBJECT_FAKE_ID_COUNTER = 1;
 
     @TestSetup
     private static void setup(){
-        Account a = new TestHelper.AccountFactory()
-                .withRecordTypeName('End Customer')
-                .insertToDatabase()
-                .create();
-        new TestHelper.ContactFactory()
-                .withEmail(TEST_EMAIL)
-                .withFirstName('Olegunar')
-                .withLastName('Pavlusik')
-                .withAccount(a.Id)
-                .insertToDatabase()
-                .create();
+        Account a = new Account();
+        insert a;
+        Contact c = new Contact(
+                Email = TEST_EMAIL,
+                FirstName = 'Test First Name',
+                LastName = 'TestLastName',
+                AccountId = a.Id
+        );
+        insert c;
+    }
+
+    private static String getFakeId(Schema.SObjectType sot)
+    {
+        String result = String.valueOf(OBJECT_FAKE_ID_COUNTER++);
+        return sot.getDescribe().getKeyPrefix() +
+                '0'.repeat(12-result.length()) + result;
     }
 
     @IsTest
@@ -69,7 +75,7 @@ public with sharing class LoggerTest {
     private static void testLogWithRelatedRecord(){
         Test.startTest();
 
-        String fakeAccId = fflib_IDGenerator.generate(Account.SObjectType);
+        String fakeAccId = getFakeId(Account.SObjectType);
         for(Integer i = 0; i < NUM_RECORDS; i++){
             Logger.log(Logger.Level.ERROR, 'testLogWithRelatedRecord', LOG_LOCATION, null, fakeAccId);
         }
@@ -91,7 +97,7 @@ public with sharing class LoggerTest {
         Test.startTest();
 
         for(Integer i = 0; i < NUM_RECORDS; i++){
-            Logger.log(Logger.Level.ERROR, 'testLogWithCorrectNotificationEmail', LOG_LOCATION, null, fflib_IDGenerator.generate(Account.SObjectType), 'correct@email.address');
+            Logger.log(Logger.Level.ERROR, 'testLogWithCorrectNotificationEmail', LOG_LOCATION, null, getFakeId(Account.SObjectType), 'correct@email.address');
         }
 
         Test.stopTest();
@@ -111,7 +117,7 @@ public with sharing class LoggerTest {
         Test.startTest();
 
         for(Integer i = 0; i < NUM_RECORDS; i++){
-            Logger.log(Logger.Level.ERROR, 'testLogWithNotCorrectNotificationEmail', LOG_LOCATION, null, fflib_IDGenerator.generate(Account.SObjectType), 'not_correct_email_address');
+            Logger.log(Logger.Level.ERROR, 'testLogWithNotCorrectNotificationEmail', LOG_LOCATION, null, getFakeId(Account.SObjectType), 'not_correct_email_address');
         }
         
         Test.stopTest();
