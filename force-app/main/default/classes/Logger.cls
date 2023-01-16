@@ -1,8 +1,8 @@
 public with sharing class Logger {
-    public enum Level { 
-		ERROR, 
-		DEBUG 
-	}
+    public enum Level {
+        ERROR,
+        DEBUG
+    }
 
     /**
     * @description Log errors in bulk which are direct results of a DML
@@ -51,7 +51,7 @@ public with sharing class Logger {
         Integer index = 0;
         Integer errorIds = 0;
         Map<String, SObject> errorMap = new Map<String, SObject>();
-        for (Database.SaveResult sr :results) {
+        for (Database.SaveResult sr : results) {
             if (!sr.isSuccess() && errorMap.size() < 1000) {
                 for (Database.Error error : sr.getErrors()) {
                     String saveResultErrMsg = error.getMessage();
@@ -65,10 +65,10 @@ public with sharing class Logger {
         }
 
         List<LogDetail> errorDetails = new List<LogDetail>();
-        for (String saveResultErrMsg: errorMap.keySet()) {
+        for (String saveResultErrMsg : errorMap.keySet()) {
             String errorMessage = saveResultErrMsg;
-            if(String.isNotBlank(developerErrorMessage)) {
-                errorMessage =  developerErrorMessage + ': ' + errorMessage;
+            if (String.isNotBlank(developerErrorMessage)) {
+                errorMessage = developerErrorMessage + ': ' + errorMessage;
             }
             errorDetails.add(new LogDetail(Logger.Level.ERROR, errorMessage, location, null, errorMap.get(saveResultErrMsg)));
         }
@@ -76,20 +76,20 @@ public with sharing class Logger {
         Logger.log(errorDetails);
     }
 
-    public class LogDetail{
+    public class LogDetail {
         public Level logLevel;
         public String message;
         public String location;
-        public Exception e {get; set;}
-        public String relatedRecordId {get; set;}
-        public String notificationEmail {get; set;}
+        public Exception e { get; set; }
+        public String relatedRecordId { get; set; }
+        public String notificationEmail { get; set; }
 
         public LogDetail(Level logLevel,
-                            String message,
-                            String location,
-                            Exception e,
-                            SObject relatedRecord,
-                            String notificationEmail) {
+                String message,
+                String location,
+                Exception e,
+                SObject relatedRecord,
+                String notificationEmail) {
             this.logLevel = logLevel;
             this.message = message + ',\nRecord: ' + String.valueOf(relatedRecord);
             this.location = location;
@@ -99,10 +99,10 @@ public with sharing class Logger {
         }
 
         public LogDetail(Level logLevel,
-                            String message,
-                            String location,
-                            Exception e,
-                            SObject relatedRecord) {
+                String message,
+                String location,
+                Exception e,
+                SObject relatedRecord) {
             this.logLevel = logLevel;
             this.message = message + ',\nRecord: ' + String.valueOf(relatedRecord);
             this.location = location;
@@ -111,9 +111,9 @@ public with sharing class Logger {
         }
 
         public LogDetail(Level logLevel,
-                            String message,
-                            String location,
-                            Exception e) {
+                String message,
+                String location,
+                Exception e) {
             this.logLevel = logLevel;
             this.message = message;
             this.location = location;
@@ -123,8 +123,8 @@ public with sharing class Logger {
         }
 
         public LogDetail(Level logLevel,
-                            String message,
-                            String location) {
+                String message,
+                String location) {
             this.logLevel = logLevel;
             this.message = message;
             this.location = location;
@@ -137,36 +137,36 @@ public with sharing class Logger {
     public static void log(List<LogDetail> logDetails) {
         List<Log__e> logEvents = new List<Log__e>();
 
-		for(LogDetail detail : logDetails) {
+        for (LogDetail detail : logDetails) {
             logEvents.add(createLogEvent(detail.logLevel,
-                                            detail.message,
-                                            detail.location,
-                                            detail.e,
-                                            detail.relatedRecordId,
-                                            detail.notificationEmail));
+                    detail.message,
+                    detail.location,
+                    detail.e,
+                    detail.relatedRecordId,
+                    detail.notificationEmail));
         }
         EventBus.publish(logEvents);
-	}
+    }
 
-	public static void log(Level logLevel, String message, String location) {
-		log(logLevel, message, location, null, '', '');
-	}
+    public static void log(Level logLevel, String message, String location) {
+        log(logLevel, message, location, null, '', '');
+    }
 
     public static void log(Level logLevel, String message, String location, Exception e) {
-		log(logLevel, message, location, e, '', '');
-	}
+        log(logLevel, message, location, e, '', '');
+    }
 
     public static void log(Level logLevel, String message, String location, Exception e, String relatedRecordId) {
-		emit(logLevel, message, location, e, relatedRecordId, '');
-	}
+        emit(logLevel, message, location, e, relatedRecordId, '');
+    }
 
     public static void log(Level logLevel, String message, String location, String relatedRecordId) {
         emit(logLevel, message, location, null, relatedRecordId, '');
     }
 
-	public static void log(Level logLevel, String message, String location, Exception e, String relatedRecordId, String notificationEmail) {
-		emit(logLevel, message, location, e, relatedRecordId, notificationEmail);
-	}
+    public static void log(Level logLevel, String message, String location, Exception e, String relatedRecordId, String notificationEmail) {
+        emit(logLevel, message, location, e, relatedRecordId, notificationEmail);
+    }
 
     private static void emit(Level logLevel, String message, String location, Exception e, String relatedRecordId, String notificationEmail) {
         Log__e currentEvent = new Log__e();
@@ -175,7 +175,7 @@ public with sharing class Logger {
         EventBus.publish(currentEvent);
     }
 
-    private static Log__e createLogEvent (Level logLevel, String message, String logLocation, Exception e, String relatedRecordId, String notificationEmail){
+    private static Log__e createLogEvent(Level logLevel, String message, String logLocation, Exception e, String relatedRecordId, String notificationEmail) {
         Log__e newEvent = new Log__e();
         newEvent.Related_Record_ID__c = relatedRecordId;
         newEvent.Message__c = Utility.safeAbbreviate(message, Schema.SObjectType.Log__e.fields.Message__c.getLength());
@@ -195,7 +195,7 @@ public with sharing class Logger {
         };
         newEvent.Limits__c = Utility.safeAbbreviate(JSON.serialize(limits), SObjectType.Log__e.fields.Limits__c.length);
 
-        if(e != null) {
+        if (e != null) {
             newEvent.Exception_Type__c = e.getTypeName();
             newEvent.Exception_Stack_Trace__c = e.getStackTraceString();
             newEvent.Exception_Message__c = e.getMessage();
